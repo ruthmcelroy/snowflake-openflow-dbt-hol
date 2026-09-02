@@ -48,7 +48,10 @@ agent looks broken.
 4. Apply the Semantic View grants from the per-track `*_semantic_view.sql`
    files.
 5. Create the agents.
-6. Test as an attendee-role user, not as ACCOUNTADMIN.
+6. **Optional but recommended: wire the dbt Semantic Layer in via MCP** —
+   see the dedicated section below. Do this once you have a working dbt
+   platform host to point at (yours, or the shared workshop account).
+7. Test as an attendee-role user, not as ACCOUNTADMIN.
 
 ---
 
@@ -252,17 +255,97 @@ You are testing as ACCOUNTADMIN. Always retest with a user whose only role is
 
 ---
 
-## The other half of the consumption story
+## Wiring in the dbt Semantic Layer via MCP
 
-This page covers the Snowflake-native path: metrics defined in a Snowflake
-Semantic View, read by Cortex Analyst.
+**This closed on Aug 24, 2026.** Registering the dbt MCP Server directly
+inside Snowflake's agent surface used to be blocked (Snowflake wanted a
+confidential OAuth client with a secret; dbt only issued public clients).
+Snowflake added `TYPE = OAUTH_DYNAMIC_CLIENT` support, which matches what
+dbt already issues, and the fix is documented, with exact SQL, at
+[Integrate Snowflake Cortex agents with dbt MCP](https://docs.getdbt.com/docs/dbt-ai/integrate-mcp-snowflake-cortex)
+(dbt Developer Hub). What follows is that SQL adapted to this lab's naming.
 
-The other path is metrics defined in the dbt Semantic Layer and served through
-the dbt MCP Server. Registering that server directly inside Snowflake
-CoWork does not currently work: Snowflake's external MCP connectors
-require OAuth with a client secret, and dbt's remote MCP server issues public
-clients using PKCE. Nothing is required from the Snowflake side to work around
-it.
+**Read the multi-tenancy note in
+[../../docs/dbt-mcp-on-snowflake-ai.md](../../docs/dbt-mcp-on-snowflake-ai.md#3-wire-the-dbt-semantic-layer-into-snowflake-cowork-the-fix-do-this)
+first.** This binds to *one* dbt platform host. If the room is on one shared
+workshop dbt account, this is a single setup that works for everyone. If
+attendees are on individual trial signups, treat this as a live demo on one
+account instead of asking every attendee to run `ACCOUNTADMIN` SQL.
 
-The full explanation, with citations and a path that works today, is in
-[../../docs/dbt-mcp-on-snowflake-ai.md](../../docs/dbt-mcp-on-snowflake-ai.md).
+Replace `{{DBT_HOST}}` with your dbt platform host (no `https://`, e.g.
+`abc123.us1.dbt.com`), and `<schema>` with wherever you want the MCP server
+and agent objects to live.
+
+### Step 1: API integration (ACCOUNTADMIN)
+
+```sql
+CREATE API INTEGRATION IF NOT EXISTS hol_dbt_mcp_integration
+  API_PROVIDER = EXTERNAL_MCP
+  API_ALLOWED_PREFIXES = ('https://{{DBT_HOST}}/api/ai/v1/mcp')
+  API_USER_AUTHENTICATION = (
+    TYPE = OAUTH_DYNAMIC_CLIENT
+    OAUTH_CLIENT_AUTH_METHOD = NONE
+    OAUTH_TOKEN_ENDPOINT = 'https://{{DBT_HOST}}/oauth/token'
+    OAUTH_AUTHORIZATION_ENDPOINT = 'https://{{DBT_HOST}}/oauth/authorize'
+    OAUTH_RESOURCE_URL = 'https://{{DBT_HOST}}/api/ai/v1/mcp'
+    OAUTH_ALLOWED_SCOPES = ('user_access', 'offline_access')
+  )
+  ENABLED = TRUE;
+```
+
+### Step 2: external MCP server
+
+```sql
+GRANT CREATE EXTERNAL MCP SERVER ON SCHEMA HOL_SNOWFLAKE_INDUSTRY.<schema> TO ROLE HOL_DBT;
+
+CREATE EXTERNAL MCP SERVER IF NOT EXISTS HOL_SNOWFLAKE_INDUSTRY.<schema>.hol_dbt_semantic_layer_mcp
+  WITH DISPLAY_NAME = 'dbt Semantic Layer MCP'
+  URL = 'https://{{DBT_HOST}}/api/ai/v1/mcp'
+  API_INTEGRATION = hol_dbt_mcp_integration;
+
+GRANT USAGE ON EXTERNAL MCP SERVER HOL_SNOWFLAKE_INDUSTRY.<schema>.hol_dbt_semantic_layer_mcp TO ROLE HOL_ATTENDEE;
+GRANT USAGE ON INTEGRATION hol_dbt_mcp_integration TO ROLE HOL_ATTENDEE;
+```
+
+### Step 3: add it to an agent
+
+Either create a fourth agent dedicated to the Semantic Layer, or add the MCP
+server to one of the three existing agents (`HOL_CPG_ANALYST` etc.) so
+attendees can compare both paths from the same place — this lab's existing
+agent-instruction text and sample questions already assume the latter.
+Whichever you pick, the specification needs an `mcp_servers:` block:
+
+```sql
+CREATE AGENT IF NOT EXISTS HOL_SNOWFLAKE_INDUSTRY.<schema>.hol_semantic_layer_analyst
+  COMMENT = 'Analytics agent powered by the dbt Semantic Layer via MCP'
+  FROM SPECIFICATION
+  $$
+  models:
+    orchestration: "claude-4-sonnet"
+  instructions:
+    orchestration: 'Always use the dbt MCP tools (list_metrics, get_dimensions, query_metrics) to answer questions rather than writing raw SQL.'
+  mcp_servers:
+    - server_spec:
+        name: "HOL_SNOWFLAKE_INDUSTRY.<schema>.hol_dbt_semantic_layer_mcp"
+  $$;
+
+GRANT USAGE ON AGENT HOL_SNOWFLAKE_INDUSTRY.<schema>.hol_semantic_layer_analyst TO ROLE HOL_ATTENDEE;
+```
+
+### Step 4: each attendee connects once
+
+In Snowflake CoWork, open the connector settings (labelled **MCP
+Connectors**, or the **Connectors** panel on the agent's sources, at time of
+writing), find the dbt connector, and select **Connect**. This redirects to
+dbt platform's sign-in and consent screen; approve it, scoping to your own
+project if the prompt offers it. Snowflake self-registers with dbt through
+Dynamic Client Registration on first connect — nothing for an admin to do
+per attendee.
+
+### Prerequisites and troubleshooting
+
+Full prerequisites (static dbt subdomain, Remote MCP OAuth beta tier, AI
+features, a configured Semantic Layer) and troubleshooting for this exact
+flow are in
+[../../docs/dbt-mcp-on-snowflake-ai.md](../../docs/dbt-mcp-on-snowflake-ai.md),
+section 6.

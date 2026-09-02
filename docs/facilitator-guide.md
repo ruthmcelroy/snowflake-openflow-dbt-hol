@@ -120,6 +120,12 @@ Tell the author either way, so the repo gets fixed rather than just your copy.
       and the energy agent returning empty answers for "this year"
 - [ ] Ask one question per track in Snowflake CoWork, **signed in as a
       user whose only role is `HOL_ATTENDEE`**
+- [ ] **Wire the dbt Semantic Layer into CoWork via MCP** —
+      [agents_setup.md](../snowflake/cortex_semantic/agents_setup.md#wiring-in-the-dbt-semantic-layer-via-mcp).
+      This used to be blocked; it's fixed as of Aug 24, 2026 and it's the
+      best moment in section 8 now. Skip only if you're on individual
+      per-attendee dbt trials rather than a shared workshop account (see
+      the multi-tenancy note there) — demo it live instead
 
 ### Day of, before doors open
 
@@ -266,26 +272,33 @@ better than any slide.
 models running hourly it is the difference between a warehouse bill you can
 defend and one you cannot.
 
+**At 1:35, the dbt Semantic Layer inside CoWork.** *"Until three days ago,
+this was two products that couldn't talk to each other directly — you'd have
+had to use a separate app to get this. Snowflake shipped the fix on August
+24th. Watch: same question, same governed metric, now asked straight from
+CoWork."* If you've wired it in (see the pre-flight checklist), this is the
+line to say right before you ask it live.
+
 ---
 
 ## Known gaps, so you are not caught out
 
-**The dbt MCP Server cannot currently be registered inside Snowflake
-CoWork.** Snowflake's external MCP connectors require OAuth with a client
-secret; dbt's remote MCP issues public clients using PKCE. Separately,
-Snowflake has no documented way to send the `x-dbt-prod-environment-id` header
-dbt requires.
+**The dbt MCP Server ↔ Snowflake integration is fixed, as of Aug 24, 2026 —
+it used to be the gap here, it isn't anymore.** Snowflake added
+`OAUTH_DYNAMIC_CLIENT` support for external MCP integrations, matching the
+public-client OAuth dbt's remote MCP server already issues. Section 8 now
+treats this as a real hands-on (or facilitator-demo, depending on your dbt
+account setup — see the multi-tenancy note) part of the lab rather than a
+walkthrough-because-it's-broken. Full detail, exact SQL, and citations in
+[dbt-mcp-on-snowflake-ai.md](dbt-mcp-on-snowflake-ai.md) and
+[../snowflake/cortex_semantic/agents_setup.md](../snowflake/cortex_semantic/agents_setup.md).
 
-Section 8 handles this honestly: Cortex Analyst against the Snowflake Semantic
-View is fully hands-on, and the dbt MCP half is a guided walkthrough with a
-take-home that genuinely works. Full detail and citations in
-[dbt-mcp-on-snowflake-ai.md](dbt-mcp-on-snowflake-ai.md).
+**If it's your first time delivering this since the fix landed, budget a
+few extra minutes to set it up and test it** — it's new, and "new" means
+worth a dry run of its own, same as everything else in this lab.
 
-**Do not gloss over this if someone asks.** Explaining precisely why two
-products do not yet interoperate is more credible than pretending the gap is
-not there, and it is the kind of thing the room will remember you for.
-
-**Re-check it before every delivery.** Both products are moving fast.
+**Re-check it before every delivery anyway.** Both products are moving fast,
+and this fix is only two days old as of this writing.
 
 **`ai.snowflake.com`, the exact Cortex Agent object model under the CoWork
 rebrand, and the CoWork automation demo slotted into section 8's agenda are
@@ -304,6 +317,8 @@ that gets closed. See `BUILD-NOTES.md` section 4.
 - [ ] Suspend the warehouse
 - [ ] Consider dropping attendee dev schemas: 30 people times one schema each
 - [ ] Note anything that broke, and open an issue on the repo
-- [ ] If the dbt MCP and Snowflake CoWork gap has closed, update
-      [dbt-mcp-on-snowflake-ai.md](dbt-mcp-on-snowflake-ai.md), the three
-      attendee guides and this file
+- [ ] If the dbt MCP ↔ CoWork setup behaved differently than documented
+      (new UI labels, changed SQL, tier restrictions lifted), update
+      [dbt-mcp-on-snowflake-ai.md](dbt-mcp-on-snowflake-ai.md),
+      [../snowflake/cortex_semantic/agents_setup.md](../snowflake/cortex_semantic/agents_setup.md),
+      the three attendee guides and this file

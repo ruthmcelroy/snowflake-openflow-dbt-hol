@@ -227,33 +227,40 @@ because its branches are cleanly independent.
 
 ## 4. Open items and honest gaps
 
-### The dbt MCP Server cannot currently be registered directly in Snowflake CoWork
+### RESOLVED 2026-08-24: the dbt MCP Server can now be registered directly in Snowflake's agent surface
 
-This is the one place the lab could not be built as specified, and it is a
-product-compatibility gap rather than a design choice.
+This was the one place the lab could not be built as specified, for as long
+as this repo existed. It's closed now — worth leaving this note in place so
+nobody re-discovers the old blocker and "fixes" it backwards.
 
-- Snowflake's `CREATE EXTERNAL MCP SERVER` requires an API integration with
-  `API_USER_AUTHENTICATION = (TYPE = OAUTH2 ...)`, including
-  `OAUTH_CLIENT_ID` and `OAUTH_CLIENT_SECRET`. The documentation states
-  Snowflake supports OAuth only for MCP server connections; bearer-token and
-  header auth are not supported.
-- dbt's remote MCP server offers either token auth (an `Authorization` header
-  plus an `x-dbt-prod-environment-id` header) or OAuth. Its OAuth uses dynamic
-  client registration (RFC 7591), and manually registered clients use PKCE
-  **instead of a client secret**.
+**What it used to be:** Snowflake's `CREATE EXTERNAL MCP SERVER` required an
+API integration with `API_USER_AUTHENTICATION = (TYPE = OAUTH2 ...)`,
+including `OAUTH_CLIENT_ID` and `OAUTH_CLIENT_SECRET` — a confidential
+client. dbt's remote MCP server only ever issued public clients (dynamic
+registration per RFC 7591, or PKCE per RFC 7636, no secret). Separately,
+dbt's endpoint required an `x-dbt-prod-environment-id` header Snowflake had
+no documented way to send. Two independent blockers.
 
-So Snowflake wants a confidential client with a secret, dbt issues a public
-client with PKCE, and Snowflake has no documented way to send the required
-`x-dbt-prod-environment-id` header. Two independent blockers.
+**What changed:** Snowflake shipped `TYPE = OAUTH_DYNAMIC_CLIENT` with
+`OAUTH_CLIENT_AUTH_METHOD = NONE` for external MCP integrations — a public
+client via Dynamic Client Registration + PKCE, matching what dbt already
+issues. Project scoping moved into the OAuth consent step, so the header
+requirement is gone too. Documented by dbt Labs at
+[Integrate Snowflake Cortex agents with dbt MCP](https://docs.getdbt.com/docs/dbt-ai/integrate-mcp-snowflake-cortex),
+last updated Aug 24, 2026 — fetched and read in full to confirm this, not
+taken from a search summary.
 
-`docs/dbt-mcp-on-snowflake-ai.md` documents both sides accurately, states the
-blocker precisely with citations, marks the direct-registration path
-`TODO: verify`, and gives a hands-on alternative that works today. The
-Snowflake Semantic View path via Cortex Analyst stays fully hands-on, so the
-consumption section of the lab is not weakened.
+`docs/dbt-mcp-on-snowflake-ai.md` section 3 has the full mechanism and a
+multi-tenancy caveat (this binds to one dbt platform host, so it's a single
+setup for a shared workshop account but a per-account thing for individual
+trial signups). `snowflake/cortex_semantic/agents_setup.md` has the exact
+SQL, adapted to this lab's naming, alongside the three Cortex Agents it
+already builds.
 
-Re-check before each delivery. Both products are moving quickly and this may
-have closed.
+Re-check before each delivery anyway — both products are still moving
+quickly, and dbt's own page still says "Snowflake Intelligence" rather than
+"CoWork," which is a naming lag worth watching, not a sign the mechanism
+changed back.
 
 ### What HAS been verified with the dbt CLI
 

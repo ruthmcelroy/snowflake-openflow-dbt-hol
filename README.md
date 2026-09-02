@@ -13,6 +13,16 @@ You will model seeded raw data in dbt Studio with dbt Wizard doing the heavy
 lifting, define the same metrics two different ways, and then ask (and have
 CoWork act on) questions about your own data in plain English.
 
+> **Fixed Aug 24, 2026: the dbt Semantic Layer now plugs directly into
+> Snowflake CoWork.** Consuming it used to require a separate MCP client
+> because of an OAuth mismatch between the two products. Snowflake shipped
+> the fix — a public-client OAuth flow that matches what dbt's MCP server
+> already issues — so this is now a real, hands-on part of the lab: connect
+> once, then ask CoWork a governed metric straight from the dbt Semantic
+> Layer, not just the Snowflake Semantic View. Exact setup, and the one
+> caveat worth knowing before you rely on it for a room full of people:
+> **[docs/dbt-mcp-on-snowflake-ai.md](docs/dbt-mcp-on-snowflake-ai.md)**.
+
 **[Open the interactive guide](https://hicham-bab.github.io/snowflake-openflow-dbt-hol/)**
 for a click-through version of this lab: pick your track and the whole run of
 show tailors itself, with checkboxes that remember where you got to.
@@ -156,7 +166,8 @@ guides are explicit about when you would reach for each.
 │   ├── agenda.md                the two-hour run of show
 │   ├── account-setup.md         dbt platform and Snowflake signup, and fallbacks
 │   ├── attendee-guide-*.md      one step-by-step guide per track
-│   ├── dbt-mcp-on-snowflake-ai.md   wiring the dbt MCP Server into an AI client
+│   ├── dbt-mcp-on-snowflake-ai.md   wiring the dbt MCP Server into Snowflake
+│   │                                CoWork (fixed Aug 2026) or any other AI client
 │   ├── facilitator-guide.md     instructor runbook
 │   ├── answer-key.md            facilitator only: every seeded bug and its fix
 │   └── adding-an-industry.md    how to add a fourth track

@@ -982,3 +982,20 @@ models:
             combination_of_columns:
               - job_category
               - education_level
+
+  # ===========================================================================
+  # fs_time_spine
+  #
+  # Required by the dbt Semantic Layer. Every metric above has a time
+  # dimension (as_of_date, assessment_date), and the semantic layer will not
+  # serve those metrics without a model configured as a time spine at DAY
+  # granularity.
+  # ===========================================================================
+  - name: fs_time_spine
+    description: One row per calendar day, 2015-01-01 through 2035-01-01.
+    time_spine:
+      standard_granularity_column: date_day
+    columns:
+      - name: date_day
+        description: The base date column, at DAY granularity.
+        granularity: day
