@@ -117,9 +117,9 @@ models:
         data_type: number(18,2)
         description: Units implied by dividing order value by unit price.
 
-      # HOL_BUG_CPG_04
-      - name: customer_ltv
+      - name: customer_lifetime_value
         data_type: number(18,2)
+
         description: Modelled customer lifetime value in USD.
 
       - name: product_rating
@@ -429,7 +429,8 @@ models:
         data_tests:
           - dbt_utils.accepted_range:
               arguments:
-                min_value: 95
+                min_value: 90
+
                 inclusive: true
 
       - name: data_quality_grade

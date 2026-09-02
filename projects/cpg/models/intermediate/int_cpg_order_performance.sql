@@ -39,10 +39,8 @@ classified as (
         revenue_growth_rate,
         customer_satisfaction_rate,
 
-        -- HOL_BUG_CPG_01
-        -- The staging model renames the raw `customer_ltv` column to
-        -- `customer_lifetime_value`. This line still uses the raw name.
-        customer_ltv,
+        customer_lifetime_value,
+
 
         -- ---- derived: commercial banding -------------------------------------
         -- Order size band. Thresholds are the ones the commercial team uses in
