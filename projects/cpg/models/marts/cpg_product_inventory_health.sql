@@ -35,8 +35,8 @@ select
     -- ---- measures --------------------------------------------------------------
     cast(inventory_level as number(38, 0)) as inventory_level,
     cast(demand_forecast as number(38, 0)) as demand_forecast,
-    -- HOL_BUG_CPG_02
-    cast(inventory_coverage_rate as number(18, 4)) as inventory_coverage_ratio,
+    cast(inventory_coverage_ratio as number(18, 4)) as inventory_coverage_ratio,
+
     cast(inventory_turnover as number(9, 4)) as inventory_turnover,
     cast(stockout_rate as number(9, 6)) as stockout_rate,
     cast(overstock_rate as number(9, 6)) as overstock_rate,
