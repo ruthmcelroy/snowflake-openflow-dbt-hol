@@ -255,26 +255,24 @@ It frequently looks like a modelling problem and is almost always a grant.
 
 ---
 
-## 7. One thing the Snowflake side cannot fix
+## 7. Wiring the dbt Semantic Layer in via MCP (fixed Aug 24, 2026 — do this)
 
-Worth knowing so nobody spends the morning on it.
+This used to be the one thing the Snowflake side couldn't fix: registering
+the dbt MCP Server directly inside Snowflake's agent surface required a
+confidential OAuth client with a secret, and dbt's remote MCP server only
+ever issued public clients. **That's resolved.** Snowflake added
+`TYPE = OAUTH_DYNAMIC_CLIENT` support for external MCP server integrations —
+a public client via Dynamic Client Registration + PKCE, exactly what dbt
+issues — so this is now a real, admin-configurable integration rather than a
+documented gap.
 
-The lab wires the dbt Semantic Layer into an AI client through the dbt MCP
-Server. Registering that server directly inside Snowflake CoWork does not
-currently work, and it is not a configuration problem on your side.
-
-Snowflake's `CREATE EXTERNAL MCP SERVER` requires an API integration using
-OAuth with a client ID and client secret, and the documentation states OAuth is
-the only supported method for MCP server connections. dbt's remote MCP server
-offers token auth via headers, or OAuth where manually registered clients use
-PKCE **instead of** a client secret. Snowflake wants a confidential client;
-dbt issues a public one. Separately, dbt's endpoint needs an
-`x-dbt-prod-environment-id` header that the Snowflake connector has no
-documented way to send.
-
-`docs/dbt-mcp-on-snowflake-ai.md` covers this in full and gives the attendees a
-path that works today. Nothing is required from the Snowflake side beyond the
-Semantic View grants in section 6.
+Exact SQL (`CREATE API INTEGRATION`, `CREATE EXTERNAL MCP SERVER`, adding
+`mcp_servers:` to an agent spec) is in
+[`cortex_semantic/agents_setup.md`](cortex_semantic/agents_setup.md#wiring-in-the-dbt-semantic-layer-via-mcp).
+One thing worth knowing before you set it up: it binds to *one* dbt platform
+host, so it's a single one-time setup if the room shares a workshop dbt
+account, but a per-account thing if attendees are on individual trials —
+see that page for the multi-tenancy note.
 
 ---
 
@@ -294,3 +292,4 @@ Run through this the day before, not the morning of.
 - [ ] Snowflake CoWork enabled and reachable with the lab role — `TODO: verify` the current URL/enablement steps under the CoWork rebrand
 - [ ] Semantic View grants applied **after** the dbt job has run at least once
 - [ ] One end-to-end question answered in Snowflake CoWork, signed in as an attendee-role user rather than as ACCOUNTADMIN
+- [ ] dbt Semantic Layer wired in via MCP (section 7) — optional, but it's the highlight moment of the consumption section now that it works

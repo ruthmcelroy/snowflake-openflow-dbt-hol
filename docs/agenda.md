@@ -17,7 +17,7 @@ at a glance whether they are ahead or behind.
 | 0:59 | Semantic layer, defined two ways | 10 | Hands-on |
 | 1:09 | Production job, docs generation, dbt State | 8 | Hands-on |
 | 1:17 | **dbt Catalog: the metadata the agent will use** | 8 | Instructor demos, attendees follow in their own Catalog |
-| 1:25 | **Ask, and act, in English — Snowflake CoWork** | 25 | Hands-on, instructor-led for the dbt MCP half |
+| 1:25 | **Ask, and act, in English — Snowflake CoWork** | 25 | Hands-on — dbt MCP half is hands-on too if wired to a shared dbt account, otherwise instructor-demoed |
 | 1:50 | Wrap, pull request, next steps | 5 | Instructor |
 | 1:55 | Buffer | 5 | Unclaimed. Use it or don't |
 | 2:00 | End | | |
@@ -49,11 +49,14 @@ two-hour lab a buffer block in the middle is the first thing that gets eaten.
 There is a real 5-minute buffer at the end now (there wasn't one before), and
 beyond that, here are the places to take time back, in order.
 
-**1. Section 9, the dbt MCP half of the CoWork section, is the designed
-compression point.** If you are behind at 1:45, run the Snowflake Semantic
-View half fully hands-on and deliver the dbt MCP Server half as a
-walkthrough on the projector. Costs nothing, because the MCP path is
-currently a read-through anyway (see below).
+**1. Section 9, the dbt MCP half of the CoWork section, is still the
+designed compression point, for a different reason than before.** The
+integration itself is fixed and fast (a one-click OAuth connect once
+it's wired in — see below), but if you are behind at 1:45, skip the live
+"watch me connect it" moment and just say it exists, pointing at
+[dbt-mcp-on-snowflake-ai.md](dbt-mcp-on-snowflake-ai.md). Costs nothing,
+because the Snowflake Semantic View half already delivered the
+natural-language experience the room came for.
 
 **2. Section 6 (production job) can drop to 5 minutes.** Show the dbt State
 second run on the projector rather than having 30 people trigger jobs
@@ -174,13 +177,18 @@ today. Sample questions are in
 This lands harder straight after Catalog, because they have just seen the
 metadata the agent is using.
 
-The dbt MCP Server half is currently a guided read-through rather than
-hands-on, because the direct registration into Snowflake CoWork does not
-work yet. The reason is specific and worth explaining rather than glossing:
-Snowflake's external MCP connectors require OAuth with a client secret and
-dbt's remote MCP issues public clients using PKCE. See
-[dbt-mcp-on-snowflake-ai.md](dbt-mcp-on-snowflake-ai.md), which also gives a
-path that does work if anyone wants to try it after.
+The dbt MCP Server half **used to be a guided read-through because direct
+registration into Snowflake's agent surface didn't work. That's fixed as of
+August 24, 2026** — Snowflake shipped OAuth support for the kind of public
+client dbt's remote MCP server already issues. If it's wired in for this
+room (see the pre-flight checklist and the multi-tenancy note in
+[dbt-mcp-on-snowflake-ai.md](dbt-mcp-on-snowflake-ai.md)), this is now a
+real hands-on moment: attendees connect once via OAuth, then ask CoWork the
+same governed question through the dbt Semantic Layer instead of the
+Snowflake Semantic View, and compare the two. If the room is on individual
+dbt trial accounts rather than a shared workshop account, demo this live
+from one account instead — the fix is per-dbt-host, not something every
+attendee configures themselves in two minutes.
 
 Financial services attendees should ask the agent for a customer's social
 security number. It cannot answer, because the column was never selected. That

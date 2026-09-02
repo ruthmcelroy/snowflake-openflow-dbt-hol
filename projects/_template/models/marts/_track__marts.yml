@@ -167,3 +167,22 @@ models:
     description: >
       Snowflake Semantic View over <...>. Read by Cortex Analyst and Snowflake
       Intelligence.
+
+  # ===========================================================================
+  # <track_key>_time_spine
+  #
+  # Required by the dbt Semantic Layer as soon as any metric above has a time
+  # dimension (which yours does: <date_column>). Without a model configured
+  # as a time spine at DAY granularity, the semantic layer will not serve any
+  # metric, and dbt platform commands (including dbt seed) fail at parse time
+  # with "The semantic layer requires a time spine model with granularity DAY
+  # or smaller."
+  # ===========================================================================
+  - name: <track_key>_time_spine
+    description: One row per calendar day, 2015-01-01 through 2035-01-01.
+    time_spine:
+      standard_granularity_column: date_day
+    columns:
+      - name: date_day
+        description: The base date column, at DAY granularity.
+        granularity: day

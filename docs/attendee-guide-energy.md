@@ -532,20 +532,23 @@ there's a governed action worth showing here (a maintenance alert, a ticket,
 a written-back field, tied to `unplanned_work_rate` or one of the price
 metrics above), this is where it goes.
 
-### 8.3 dbt Semantic Layer, via the dbt MCP Server (guided)
-
-The instructor will walk through this rather than everyone doing it live, and
-there is an honest reason why.
+### 8.3 dbt Semantic Layer, via the dbt MCP Server — now inside CoWork too
 
 The dbt MCP Server exposes your MetricFlow metrics as tools an AI agent can
 call, so the agent asks dbt for `unplanned_work_rate` rather than writing its
-own SQL. Registering that server directly inside Snowflake CoWork **does
-not currently work**: Snowflake's external MCP connectors require OAuth with a
-client secret, and dbt's remote MCP server issues public clients using PKCE.
+own SQL. Registering that server directly inside Snowflake's agent surface
+**used to be blocked** by an OAuth mismatch — fixed on August 24, 2026, so
+this is a real part of the lab now, not a workaround.
 
-What does work today, and is worth twenty minutes afterwards, is connecting the
-dbt MCP Server to an MCP client that supports it. Full instructions:
-[dbt-mcp-on-snowflake-ai.md](dbt-mcp-on-snowflake-ai.md).
+**If your facilitator has wired it in** (check — it depends on whether the
+room shares one dbt platform account), connect once: in CoWork's connector
+settings, find the dbt connector and select **Connect**, sign in to dbt
+platform, and approve. Then ask the same question you asked Cortex Analyst
+and compare. If it isn't wired in for this room, your instructor will demo it
+instead — the setup binds to one dbt host, so it isn't something everyone
+configures individually in two minutes.
+
+Full instructions, with the exact SQL: [dbt-mcp-on-snowflake-ai.md](dbt-mcp-on-snowflake-ai.md).
 
 **The takeaway:** when the agent answers through the semantic layer, it is
 constrained to metrics somebody defined and reviewed. When it writes its own

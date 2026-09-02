@@ -322,10 +322,10 @@
     </div>
     <div class="card">
       <h3>dbt Semantic Layer via the dbt MCP Server</h3>
-      <span class="status" style="background:rgba(227,179,65,.15);color:var(--amber)">Guided walkthrough · see note</span>
+      <span class="status" style="background:rgba(63,185,80,.15);color:var(--green)">Fixed Aug 24, 2026 · hands-on today</span>
       <table>
         <tr><td>Definition lives in</td><td>Your dbt repo, in git</td></tr>
-        <tr><td>Consumed by</td><td>Any MCP client</td></tr>
+        <tr><td>Consumed by</td><td>Snowflake CoWork (native, via MCP), plus any other MCP client</td></tr>
         <tr><td>Non-Snowflake tools</td><td>Yes</td></tr>
         <tr><td>Change control</td><td>Pull request on the YAML</td></tr>
         <tr><td>Reach for it when</td><td>A metric must mean the same thing in Snowflake, a BI tool, a notebook and a Slack bot</td></tr>
@@ -333,8 +333,8 @@
     </div>
   </div>
   <div class="callout key" style="margin-top:16px">
-    <span class="lab">Why the dbt MCP path is a walkthrough (for now)</span>
-    Registering the dbt MCP Server <em>directly inside Snowflake CoWork</em> doesn't work yet: Snowflake's external MCP connectors require a confidential OAuth client with a secret, while dbt's remote MCP issues public clients using PKCE, and needs an <code>x-dbt-prod-environment-id</code> header Snowflake can't send. The dbt MCP Server works today in any MCP client (Claude Desktop, Cursor, VS Code); it's the in-Snowflake registration that's pending. Re-verify before each delivery — including whether this changed under the Snowflake Intelligence → CoWork rebrand (`TODO: verify`).
+    <span class="lab">The dbt MCP ↔ Snowflake gap closed on August 24, 2026</span>
+    Registering the dbt MCP Server <em>directly inside Snowflake's agent surface</em> used to be blocked: Snowflake wanted a confidential OAuth client with a secret, dbt only ever issued public clients (PKCE). Snowflake shipped <code>OAUTH_DYNAMIC_CLIENT</code> support &mdash; a public client, matching what dbt already sends &mdash; so this now works natively. One caveat: it binds to <em>one</em> dbt platform host, so it's a single setup for a shared workshop account, or a live instructor demo if attendees are on individual trials. Exact SQL and the full multi-tenancy note: <a href="https://github.com/hicham-bab/snowflake-openflow-dbt-hol/blob/main/docs/dbt-mcp-on-snowflake-ai.md" target="_blank">docs/dbt-mcp-on-snowflake-ai.md ↗</a>. Source: <a href="https://docs.getdbt.com/docs/dbt-ai/integrate-mcp-snowflake-cortex" target="_blank">dbt Developer Hub ↗</a>.
   </div>
 </section>
 
@@ -442,7 +442,7 @@ dbt build --select staging</pre>
     <div class="tw-metrics"></div>
     <div class="callout key"><span class="lab">Your track's governance beat</span><span class="tw-beat"></span></div>
     <div class="callout fb"><span class="lab">CoWork beyond Q&amp;A</span><em>TODO (Snowflake team):</em> everything above is Q&amp;A. CoWork's rebrand pitch is broader &mdash; reasoning across your data, automating tasks, acting in your tools. This is the reserved slot for that demo.</div>
-    <div class="callout fb"><span class="lab">The dbt MCP half</span>Delivered as a guided read-through: direct registration into Snowflake CoWork doesn't work yet (Snowflake's external MCP connectors need a confidential OAuth client with a secret; dbt issues public clients using PKCE). It works today in any MCP client, see section 3 above.</div>`},
+    <div class="callout key"><span class="lab">The dbt MCP half &mdash; fixed Aug 24, 2026</span>Direct registration into Snowflake's agent surface used to be blocked by an OAuth mismatch; it's resolved now. If it's wired in for this room, connect once (CoWork's connector settings &rarr; find the dbt connector &rarr; Connect &rarr; sign in to dbt platform) and ask the same question again through the dbt Semantic Layer instead of the Snowflake Semantic View. It binds to one dbt host, so on individual attendee trial accounts your instructor will demo this live instead. Full setup: see section 3 above.</div>`},
 
   {clock:"1:50",min:5,title:"Wrap, pull request & next steps",body:`
     <p>Commit and open a pull request. Don't merge: the point is the change is <em>reviewable</em>, not that it ships. Look at what's in the diff, including the contract change.</p>
