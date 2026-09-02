@@ -183,3 +183,4 @@ final as (
 
 select * from final
 order by data_quality_score asc
+
